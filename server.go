@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +27,8 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	stats := getStatistics()
 
 	for i := 0; i < len(stats); i++ {
-		row := fmt.Sprintf("<tr><td>%v</td><td>%v</td><td>%v</td>", stats[i].Date, stats[i].Follows, stats[i].Followers)
+		time := formatTimeEST(stats[i].Date)
+		row := fmt.Sprintf("<tr><td>%v</td><td>%v</td><td>%v</td>", time, stats[i].Follows, stats[i].Followers)
 		body.WriteString(row)
 	}
 
@@ -36,6 +38,12 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 										</div>`)
 
 	fmt.Fprintf(w, "<h1>%s</h1>%s", title, body.String())
+}
+
+func formatTimeEST(timestamp time.Time) string {
+	loc, _ := time.LoadLocation("America/New_York")
+	local := timestamp.In(loc)
+	return local.Format("03:04:05PM - 01/02/06")
 }
 
 func main() {
